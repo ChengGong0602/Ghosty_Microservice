@@ -1,0 +1,41 @@
+name: Deploy to AWS Lambda
+
+on:
+  push:
+    branches:
+    - develop   
+
+jobs:
+  deploy_lambda:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:  
+          node-version: '12'
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_FF_API_KEY: ${{ secrets.FF_API_KEY }}
+          envkey_FF_API_SECRET: ${{ secrets.FF_API_SECRET }}
+          envkey_SS_API_URL: ${{ secrets.SS_API_URL }}
+          envkey_SS_API_KEY: ${{ secrets.SS_API_KEY }}
+          envkey_CN_API_URL: ${{ secrets.CN_API_URL }}
+          envkey_CN_API_KEY: ${{ secrets.CN_API_KEY }}
+          envkey_SE_API_URL: ${{ secrets.SE_API_URL }}
+          envkey_SE_API_KEY: ${{ secrets.SE_API_KEY }}
+          file_name: .env
+          fail_on_empty: true
+      - name: npm install
+        env:
+          CI: true
+        run: |
+          npm ci 
+      - name: serverless deploy
+        uses: serverless/github-action@v3.1
+        with:
+          args: deploy --stage develop
+        env:
+          # The AWS Credentials
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

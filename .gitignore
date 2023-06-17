@@ -1,0 +1,14 @@
+# package directories
+node_modules
+jspm_packages
+
+# Serverless directories
+.serverless
+
+# env
+env
+.env
+
+# act secrets for github actions testing
+.secrets
+test.js

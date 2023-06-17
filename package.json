@@ -1,0 +1,25 @@
+{
+  "name": "lambdarestapi",
+  "version": "1.0.0",
+  "description": "AWS Lambda Rest API",
+  "main": "handler.js",
+  "scripts": {
+    "test": "sls invoke local -f router -p test/post-user.json",
+    "deploy": "sls deploy",
+    "deploy:staging": "sls deploy --stage develop"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.2.1",
+    "lambda-api": "^0.11.2",
+    "fixedfloat-api": "^1.0.1"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.1269.0",
+    "serverless-dotenv-plugin": "^4.0.2",
+    "serverless-offline": "^12.0.0",
+    "serverless-prune-plugin": "^2.0.1"
+  }
+}
