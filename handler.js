@@ -5,9 +5,9 @@ const api_func = require("./utils/api_func");
 
 api.post("/api/swap_price", async (req, res) => {
   try {
-    const SwapA_amount = req.body.SwapA_amount;
-    const SwapA_sym = req.body.SwapA_symbol;
-    const SwapB_sym = req.body.SwapB_symbol;
+    const swapA_amount = req.body.swapA_amount;
+    const SwapA_sym = req.body.swapA_symbol;
+    const SwapB_sym = req.body.swapB_symbol;
     // 1: Anonymous
     // 0: Non-Anonymous
     let isAnonym = 1;
@@ -15,19 +15,19 @@ api.post("/api/swap_price", async (req, res) => {
         isAnonym = 0
     }
 
-    let SwapA_symbol;
-    let SwapB_symbol;
-    if (SwapA_sym === "BNB") SwapA_symbol = "BSC";
-    else SwapA_symbol = SwapA_sym;
-    if (SwapB_sym === "BNB") SwapB_symbol = "BSC";
-    else SwapB_symbol = SwapB_sym;
+    let swapA_symbol;
+    let swapB_symbol;
+    if (SwapA_sym === "BNB") swapA_symbol = "BSC";
+    else swapA_symbol = SwapA_sym;
+    if (SwapB_sym === "BNB") swapB_symbol = "BSC";
+    else swapB_symbol = SwapB_sym;
 
     let exchangeFlow_list;
     await Promise.race([
       api_func.get_price(
-        SwapA_amount,
-        SwapA_symbol,
-        SwapB_symbol,
+        swapA_amount,
+        swapA_symbol,
+        swapB_symbol,
         isAnonym
       ).then(res => exchangeFlow_list = res ),
       new Promise((_resolve, reject) => {

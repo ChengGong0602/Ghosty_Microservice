@@ -9,8 +9,8 @@
         
     },
     "body": {
-        "SwapA_amount": 2,
-        "SwapA_symbol": "BSC",
-        "SwapB_symbol": "ETH"
+        "swapA_amount": 2,
+        "swapA_symbol": "BSC",
+        "swapB_symbol": "ETH"
     }
 }

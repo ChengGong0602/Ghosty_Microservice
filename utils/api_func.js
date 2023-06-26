@@ -178,14 +178,14 @@ async function se_get_max_exchange_amount(currency_from, currency_to) {
 
 function get_min_max_range(
   estimated_xmr_amount,
-  SwapA_amount,
+  swapA_amount,
   SwapA_xmr_min_amount,
   xmr_SwapB_min_amount,
   xmr_SwapB_max_amount
 ) {
     let SwapA_min_amount;
     let SwapA_max_amount;
-    const exchange_rate = parseFloat(estimated_xmr_amount) / SwapA_amount;
+    const exchange_rate = parseFloat(estimated_xmr_amount) / swapA_amount;
     const SwapA_min_amount_est = xmr_SwapB_min_amount / exchange_rate;
     const SwapA_max_amount_est =
       xmr_SwapB_max_amount === -1 ? -1 : xmr_SwapB_max_amount / exchange_rate;
@@ -201,9 +201,9 @@ function get_min_max_range(
   return [SwapA_min_amount, SwapA_max_amount]
 }
 
-async function price_cn_to_ff(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_cn_to_ff(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
-    let SwapB_amount;
+    let swapB_amount;
     let SwapA_min_amount;
     let SwapA_max_amount;
     let SwapA_xmr_min_amount;
@@ -212,52 +212,52 @@ async function price_cn_to_ff(SwapA_amount, SwapA_sym, SwapB_sym) {
     let xmr_SwapB_max_amount;
     let estimated_xmr_amount;
 
-    const SwapA_symbol = standardize_cn_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_ff_symbol(SwapB_sym);
+    const swapA_symbol = standardize_cn_symbol(SwapA_sym);
+    const swapB_symbol = standardize_ff_symbol(SwapB_sym);
     SwapA_xmr_min_amount = parseFloat(await cn_get_minimal_exchange_amount(
-      SwapA_symbol,
+      swapA_symbol,
       "xmr"
     ));
     SwapA_xmr_max_amount = parseFloat(
-      await cn_get_maximum_exchange_amount("xmr", SwapB_symbol)
+      await cn_get_maximum_exchange_amount("xmr", swapB_symbol)
     );
     if (isNaN(SwapA_xmr_max_amount)) SwapA_xmr_max_amount = -1; // no limit for max
-    const XMRObj = await getPrice(SwapA_xmr_min_amount, "XMR", SwapB_symbol);
+    const XMRObj = await getPrice(SwapA_xmr_min_amount, "XMR", swapB_symbol);
     xmr_SwapB_min_amount = XMRObj["from"]["min"];
     xmr_SwapB_max_amount = XMRObj["from"]["max"];
     if (
-      SwapA_amount < SwapA_xmr_min_amount ||
-      (SwapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
+      swapA_amount < SwapA_xmr_min_amount ||
+      (swapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
     ){
-      SwapB_amount = -1;
+      swapB_amount = -1;
       SwapA_min_amount = SwapA_xmr_min_amount; 
       SwapA_max_amount = SwapA_xmr_max_amount; 
     }
     else {
       const estimate = await cn_get_exchange_amount(
-        SwapA_amount,
-        SwapA_symbol,
+        swapA_amount,
+        swapA_symbol,
         "xmr"
       );
       estimated_xmr_amount = estimate["estimatedAmount"];
       const priceObj = await getPrice(
         estimated_xmr_amount,
         "XMR",
-        SwapB_symbol
+        swapB_symbol
       );
-      SwapB_amount = priceObj["to"]["amount"];
+      swapB_amount = priceObj["to"]["amount"];
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
-        SwapA_amount,
+        swapA_amount,
         SwapA_xmr_min_amount,
         xmr_SwapB_min_amount,
         xmr_SwapB_max_amount
       )
-      if (SwapA_amount > SwapA_max_amount && SwapA_max_amount>0 ) SwapB_amount = -1;
+      if (swapA_amount > SwapA_max_amount && SwapA_max_amount>0 ) swapB_amount = -1;
     }
     console.log("===========1=========================");
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "cn_ff"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "cn_ff"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "cn_ff"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "cn_ff"];
   } catch (error) {
     console.error("price_cn_to_ff====error:", error);
     return [0, 0, 0, "cn_ff"];
@@ -265,9 +265,9 @@ async function price_cn_to_ff(SwapA_amount, SwapA_sym, SwapB_sym) {
 }
 // price_cn_to_ff(10, "USDT", "BUSD");
 
-async function price_ff_to_cn(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_ff_to_cn(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
-    let SwapB_amount;
+    let swapB_amount;
     let SwapA_min_amount;
     let SwapA_max_amount;
     let SwapA_xmr_min_amount;
@@ -275,25 +275,25 @@ async function price_ff_to_cn(SwapA_amount, SwapA_sym, SwapB_sym) {
     let xmr_SwapB_min_amount;
     let xmr_SwapB_max_amount;
     let estimated_xmr_amount;
-    const SwapA_symbol = standardize_ff_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_cn_symbol(SwapB_sym);
+    const swapA_symbol = standardize_ff_symbol(SwapA_sym);
+    const swapB_symbol = standardize_cn_symbol(SwapB_sym);
 
-    const XMRObj = await getPrice(SwapA_amount, SwapA_symbol, "XMR");
+    const XMRObj = await getPrice(swapA_amount, swapA_symbol, "XMR");
     SwapA_xmr_min_amount = XMRObj["from"]["min"];
     SwapA_xmr_max_amount = XMRObj["from"]["max"];
     xmr_SwapB_min_amount = parseFloat(
-      await cn_get_minimal_exchange_amount("xmr", SwapB_symbol)
+      await cn_get_minimal_exchange_amount("xmr", swapB_symbol)
     );
     xmr_SwapB_max_amount = parseFloat(
-      await cn_get_maximum_exchange_amount("xmr", SwapB_symbol)
+      await cn_get_maximum_exchange_amount("xmr", swapB_symbol)
     );
     if (isNaN(xmr_SwapB_max_amount)) xmr_SwapB_max_amount = -1; // no limit for max
 
     if (
-      SwapA_amount < SwapA_xmr_min_amount ||
-      (SwapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
+      swapA_amount < SwapA_xmr_min_amount ||
+      (swapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
     ){
-      SwapB_amount = -1;
+      swapB_amount = -1;
       SwapA_min_amount = SwapA_xmr_min_amount; 
       SwapA_max_amount = SwapA_xmr_max_amount; 
     }
@@ -302,30 +302,30 @@ async function price_ff_to_cn(SwapA_amount, SwapA_sym, SwapB_sym) {
       let estimate = await cn_get_exchange_amount(
         estimated_xmr_amount,
         "xmr",
-        SwapB_symbol
+        swapB_symbol
       );
-      SwapB_amount = estimate["estimatedAmount"];
-      if (isNaN(SwapB_amount)) SwapB_amount = -1;
+      swapB_amount = estimate["estimatedAmount"];
+      if (isNaN(swapB_amount)) swapB_amount = -1;
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
-        SwapA_amount,
+        swapA_amount,
         SwapA_xmr_min_amount,
         xmr_SwapB_min_amount,
         xmr_SwapB_max_amount
       )
     }
     console.log("============2========================");
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ff_cn"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ff_cn"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "ff_cn"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "ff_cn"];
   } catch (error) {
     return [0, 0, 0, "ff_cn"];
   }
 }
 // price_ff_to_cn(10, "USDT", "BUSD");
 
-async function price_ss_to_ff(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_ss_to_ff(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
-    let SwapB_amount;
+    let swapB_amount;
     let SwapA_min_amount;
     let SwapA_max_amount;
     let SwapA_xmr_min_amount;
@@ -333,121 +333,121 @@ async function price_ss_to_ff(SwapA_amount, SwapA_sym, SwapB_sym) {
     let xmr_SwapB_min_amount;
     let xmr_SwapB_max_amount;
     let estimated_xmr_amount;
-    const SwapA_symbol = standardize_ss_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_ff_symbol(SwapB_sym);
+    const swapA_symbol = standardize_ss_symbol(SwapA_sym);
+    const swapB_symbol = standardize_ff_symbol(SwapB_sym);
     SwapA_xmr_min_amount = parseFloat( 
-      await ss_get_min_exchange_amount(SwapA_symbol, "xmr")
+      await ss_get_min_exchange_amount(swapA_symbol, "xmr")
     );
     SwapA_xmr_max_amount = parseFloat( 
-      await ss_get_max_exchange_amount(SwapA_symbol, "xmr")
+      await ss_get_max_exchange_amount(swapA_symbol, "xmr")
     );
     if (isNaN(SwapA_xmr_max_amount)) SwapA_xmr_max_amount = -1; // no limit for max
     
 
-    const XMRObj = await getPrice(SwapA_xmr_min_amount, "XMR", SwapB_symbol);
+    const XMRObj = await getPrice(SwapA_xmr_min_amount, "XMR", swapB_symbol);
     xmr_SwapB_min_amount = XMRObj["from"]["min"];
     xmr_SwapB_max_amount = XMRObj["from"]["max"];
     if (
-      SwapA_amount < SwapA_xmr_min_amount ||
-      (SwapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
+      swapA_amount < SwapA_xmr_min_amount ||
+      (swapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
     ){
-      SwapB_amount = -1;
+      swapB_amount = -1;
       SwapA_min_amount = SwapA_xmr_min_amount; 
       SwapA_max_amount = SwapA_xmr_max_amount; 
     }
     else {
       estimated_xmr_amount = await ss_get_exchange_amount(
-        SwapA_symbol,
+        swapA_symbol,
         "xmr",
-        SwapA_amount
+        swapA_amount
       );
-      const XMRObj = await getPrice(estimated_xmr_amount, "XMR", SwapB_symbol);
-      SwapB_amount = XMRObj["to"]["amount"];
+      const XMRObj = await getPrice(estimated_xmr_amount, "XMR", swapB_symbol);
+      swapB_amount = XMRObj["to"]["amount"];
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
-        SwapA_amount,
+        swapA_amount,
         SwapA_xmr_min_amount,
         xmr_SwapB_min_amount,
         xmr_SwapB_max_amount
       )
-      if (SwapA_amount > SwapA_max_amount && SwapA_max_amount>0 ) SwapB_amount = -1;
+      if (swapA_amount > SwapA_max_amount && SwapA_max_amount>0 ) swapB_amount = -1;
     }
     console.log("==========3==========================");
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ss_ff"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ss_ff"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "ss_ff"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "ss_ff"];
   } catch (error) {
     return [0, 0, 0, "ss_ff"];
   }
 }
 // price_ss_to_ff(10, "USDT", "BUSD");
 
-async function price_ss_to_cn(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_ss_to_cn(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
-    let SwapB_amount;
+    let swapB_amount;
     let SwapA_min_amount;
     let SwapA_max_amount;
     let SwapA_xmr_min_amount;
     let SwapA_xmr_max_amount;
     let xmr_SwapB_min_amount;
     let xmr_SwapB_max_amount;
-    const SwapA_symbol = standardize_ss_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_cn_symbol(SwapB_sym);
+    const swapA_symbol = standardize_ss_symbol(SwapA_sym);
+    const swapB_symbol = standardize_cn_symbol(SwapB_sym);
     SwapA_xmr_min_amount = parseFloat( 
-      await ss_get_min_exchange_amount(SwapA_symbol, "xmr")
+      await ss_get_min_exchange_amount(swapA_symbol, "xmr")
     );
     SwapA_xmr_max_amount = parseFloat( 
-      await ss_get_max_exchange_amount(SwapA_symbol, "xmr")
+      await ss_get_max_exchange_amount(swapA_symbol, "xmr")
     );
     if (isNaN(SwapA_xmr_max_amount)) SwapA_xmr_max_amount = -1; // no limit for max
     xmr_SwapB_min_amount = parseFloat(
-      await cn_get_minimal_exchange_amount("xmr", SwapB_symbol)
+      await cn_get_minimal_exchange_amount("xmr", swapB_symbol)
     );
     xmr_SwapB_max_amount = parseFloat(
-      await cn_get_maximum_exchange_amount("xmr", SwapB_symbol)
+      await cn_get_maximum_exchange_amount("xmr", swapB_symbol)
     );
     if (isNaN(xmr_SwapB_max_amount)) xmr_SwapB_max_amount = -1; // no limit for max
     if (
-      SwapA_amount < SwapA_xmr_min_amount ||
-      (SwapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
+      swapA_amount < SwapA_xmr_min_amount ||
+      (swapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
     )
     {
-      SwapB_amount = -1;
+      swapB_amount = -1;
       SwapA_min_amount = SwapA_xmr_min_amount; 
       SwapA_max_amount = SwapA_xmr_max_amount; 
     }
     else {
       estimated_xmr_amount = await ss_get_exchange_amount(
-        SwapA_symbol,
+        swapA_symbol,
         "xmr",
-        SwapA_amount
+        swapA_amount
       );
       const estimate = await cn_get_exchange_amount(
         estimated_xmr_amount,
         "xmr",
-        SwapB_symbol
+        swapB_symbol
       );
-      SwapB_amount = estimate["estimatedAmount"];
-      if (isNaN(SwapB_amount)) SwapB_amount = -1;
+      swapB_amount = estimate["estimatedAmount"];
+      if (isNaN(swapB_amount)) swapB_amount = -1;
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
-        SwapA_amount,
+        swapA_amount,
         SwapA_xmr_min_amount,
         xmr_SwapB_min_amount,
         xmr_SwapB_max_amount
       )
     }
     console.log("============4========================");
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ss_cn"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ss_cn"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "ss_cn"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "ss_cn"];
   } catch (error) {
     return [0, 0, 0, "ss_cn"];
   }
 }
 // price_ss_to_cn(10, "USDT", "BUSD");
 
-async function price_ff_to_ss(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_ff_to_ss(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
-    let SwapB_amount;
+    let swapB_amount;
     let SwapA_min_amount;
     let SwapA_max_amount;
     let SwapA_xmr_min_amount;
@@ -455,25 +455,25 @@ async function price_ff_to_ss(SwapA_amount, SwapA_sym, SwapB_sym) {
     let xmr_SwapB_min_amount;
     let xmr_SwapB_max_amount;
     let estimated_xmr_amount;
-    const SwapA_symbol = standardize_ff_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_ss_symbol(SwapB_sym);
+    const swapA_symbol = standardize_ff_symbol(SwapA_sym);
+    const swapB_symbol = standardize_ss_symbol(SwapB_sym);
 
-    const XMRObj = await getPrice(SwapA_amount, SwapA_symbol, "XMR");
+    const XMRObj = await getPrice(swapA_amount, swapA_symbol, "XMR");
     SwapA_xmr_min_amount = XMRObj["from"]["min"];
     SwapA_xmr_max_amount = XMRObj["from"]["max"];
     xmr_SwapB_min_amount = parseFloat(
-      await ss_get_min_exchange_amount("xmr", SwapB_symbol)
+      await ss_get_min_exchange_amount("xmr", swapB_symbol)
     );
     xmr_SwapB_max_amount = parseFloat(
-      await ss_get_max_exchange_amount("xmr", SwapB_symbol)
+      await ss_get_max_exchange_amount("xmr", swapB_symbol)
     );
     if (isNaN(xmr_SwapB_max_amount)) xmr_SwapB_max_amount = -1; // no limit for max
 
     if (
-      SwapA_amount < SwapA_xmr_min_amount ||
-      (SwapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
+      swapA_amount < SwapA_xmr_min_amount ||
+      (swapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
     ){
-      SwapB_amount = -1;
+      swapB_amount = -1;
       SwapA_min_amount = SwapA_xmr_min_amount; 
       SwapA_max_amount = SwapA_xmr_max_amount; 
     }
@@ -481,31 +481,31 @@ async function price_ff_to_ss(SwapA_amount, SwapA_sym, SwapB_sym) {
       estimated_xmr_amount = XMRObj["to"]["amount"];
       let res = await ss_get_exchange_amount(
         "xmr",
-        SwapB_symbol,
+        swapB_symbol,
         estimated_xmr_amount
       );
-      SwapB_amount = parseFloat(res);
-      if (isNaN(SwapB_amount)) SwapB_amount = -1;
+      swapB_amount = parseFloat(res);
+      if (isNaN(swapB_amount)) swapB_amount = -1;
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
-        SwapA_amount,
+        swapA_amount,
         SwapA_xmr_min_amount,
         xmr_SwapB_min_amount,
         xmr_SwapB_max_amount
       )
     }
     console.log("==========5==========================");
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ff_ss"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ff_ss"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "ff_ss"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "ff_ss"];
   } catch (error) {
     return [0, 0, 0, "ff_ss"];
   }
 }
 // price_ff_to_ss(10, "USDT", "BUSD");
 
-async function price_cn_to_ss(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_cn_to_ss(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
-    let SwapB_amount;
+    let swapB_amount;
     let SwapA_min_amount;
     let SwapA_max_amount;
     let SwapA_xmr_min_amount;
@@ -513,63 +513,63 @@ async function price_cn_to_ss(SwapA_amount, SwapA_sym, SwapB_sym) {
     let xmr_SwapB_min_amount;
     let xmr_SwapB_max_amount;
 
-    const SwapA_symbol = standardize_cn_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_ss_symbol(SwapB_sym);
+    const swapA_symbol = standardize_cn_symbol(SwapA_sym);
+    const swapB_symbol = standardize_ss_symbol(SwapB_sym);
     SwapA_xmr_min_amount = parseFloat(
-      await cn_get_minimal_exchange_amount(SwapA_symbol, "xmr")
+      await cn_get_minimal_exchange_amount(swapA_symbol, "xmr")
     );
     SwapA_xmr_max_amount = parseFloat(
-      await cn_get_maximum_exchange_amount(SwapA_symbol, "xmr")
+      await cn_get_maximum_exchange_amount(swapA_symbol, "xmr")
     );
     if (isNaN(SwapA_xmr_max_amount)) SwapA_xmr_max_amount = -1; // no limit for max
     xmr_SwapB_min_amount = parseFloat(
-      await ss_get_min_exchange_amount("xmr", SwapB_symbol)
+      await ss_get_min_exchange_amount("xmr", swapB_symbol)
     );
     xmr_SwapB_max_amount = parseFloat(
-      await ss_get_max_exchange_amount("xmr", SwapB_symbol)
+      await ss_get_max_exchange_amount("xmr", swapB_symbol)
     );
     if (isNaN(xmr_SwapB_max_amount)) xmr_SwapB_max_amount = -1; // no limit for max
 
     if (
-      SwapA_amount < SwapA_xmr_min_amount ||
-      (SwapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
+      swapA_amount < SwapA_xmr_min_amount ||
+      (swapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
     ){
-      SwapB_amount = -1;
+      swapB_amount = -1;
       SwapA_min_amount = SwapA_xmr_min_amount; 
       SwapA_max_amount = SwapA_xmr_max_amount; 
     }
     else {
       const estimate = await cn_get_exchange_amount(
-        SwapA_amount,
-        SwapA_symbol,
+        swapA_amount,
+        swapA_symbol,
         "xmr"
       );
       const estimated_xmr_amount = estimate["estimatedAmount"];
-      SwapB_amount = parseFloat(
-        await ss_get_exchange_amount("xmr", SwapB_symbol, estimated_xmr_amount)
+      swapB_amount = parseFloat(
+        await ss_get_exchange_amount("xmr", swapB_symbol, estimated_xmr_amount)
       );
-      if (isNaN(SwapB_amount)) SwapB_amount = -1;
+      if (isNaN(swapB_amount)) swapB_amount = -1;
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
-        SwapA_amount,
+        swapA_amount,
         SwapA_xmr_min_amount,
         xmr_SwapB_min_amount,
         xmr_SwapB_max_amount
       )
-      if (SwapA_amount > SwapA_max_amount && SwapA_max_amount>0 ) SwapB_amount = -1;
+      if (swapA_amount > SwapA_max_amount && SwapA_max_amount>0 ) swapB_amount = -1;
     }
     console.log("==========6==========================");
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "cn_ss"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "cn_ss"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "cn_ss"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "cn_ss"];
   } catch (error) {
     return [0, 0, 0, "cn_ss"];
   }
 }
 // price_cn_to_ss(10, "USDT", "BUSD");
 
-async function price_se_to_ff(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_se_to_ff(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
-    let SwapB_amount;
+    let swapB_amount;
     let SwapA_min_amount;
     let SwapA_max_amount;
     let SwapA_xmr_min_amount;
@@ -577,57 +577,57 @@ async function price_se_to_ff(SwapA_amount, SwapA_sym, SwapB_sym) {
     let xmr_SwapB_min_amount;
     let xmr_SwapB_max_amount;
     let estimated_xmr_amount;
-    const SwapA_symbol = standardize_se_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_ff_symbol(SwapB_sym);
+    const swapA_symbol = standardize_se_symbol(SwapA_sym);
+    const swapB_symbol = standardize_ff_symbol(SwapB_sym);
     SwapA_xmr_min_amount = parseFloat( 
-      await se_get_min_exchange_amount(SwapA_symbol, "xmr")
+      await se_get_min_exchange_amount(swapA_symbol, "xmr")
     );
     SwapA_xmr_max_amount = parseFloat( 
-      await se_get_max_exchange_amount(SwapA_symbol, "xmr")
+      await se_get_max_exchange_amount(swapA_symbol, "xmr")
     );
     if (isNaN(SwapA_xmr_max_amount)) SwapA_xmr_max_amount = -1; // no limit for max
     
 
-    const XMRObj = await getPrice(SwapA_xmr_min_amount, "XMR", SwapB_symbol);
+    const XMRObj = await getPrice(SwapA_xmr_min_amount, "XMR", swapB_symbol);
     xmr_SwapB_min_amount = XMRObj["from"]["min"];
     xmr_SwapB_max_amount = XMRObj["from"]["max"];
     if (
-      SwapA_amount < SwapA_xmr_min_amount ||
-      (SwapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
+      swapA_amount < SwapA_xmr_min_amount ||
+      (swapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
     ){
-      SwapB_amount = -1;
+      swapB_amount = -1;
       SwapA_min_amount = SwapA_xmr_min_amount; 
       SwapA_max_amount = SwapA_xmr_max_amount; 
     }
     else {
       estimated_xmr_amount = await se_get_exchange_amount(
-        SwapA_symbol,
+        swapA_symbol,
         "xmr",
-        SwapA_amount
+        swapA_amount
       );
-      const XMRObj = await getPrice(estimated_xmr_amount, "XMR", SwapB_symbol);
-      SwapB_amount = XMRObj["to"]["amount"];
+      const XMRObj = await getPrice(estimated_xmr_amount, "XMR", swapB_symbol);
+      swapB_amount = XMRObj["to"]["amount"];
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
-        SwapA_amount,
+        swapA_amount,
         SwapA_xmr_min_amount,
         xmr_SwapB_min_amount,
         xmr_SwapB_max_amount
       )
-      if (SwapA_amount > SwapA_max_amount && SwapA_max_amount>0 ) SwapB_amount = -1;
+      if (swapA_amount > SwapA_max_amount && SwapA_max_amount>0 ) swapB_amount = -1;
     }
     console.log("==========7==========================");
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "se_ff"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "se_ff"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "se_ff"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "se_ff"];
   } catch (error) {
     return [0, 0, 0, "se_ff"];
   }
 }
 // price_se_to_ff(10, "USDT", "BUSD");
 
-async function price_se_to_cn(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_se_to_cn(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
-    let SwapB_amount;
+    let swapB_amount;
     let SwapA_min_amount;
     let SwapA_max_amount;
     let SwapA_xmr_min_amount;
@@ -635,49 +635,49 @@ async function price_se_to_cn(SwapA_amount, SwapA_sym, SwapB_sym) {
     let xmr_SwapB_min_amount;
     let xmr_SwapB_max_amount;
 
-    const SwapA_symbol = standardize_se_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_cn_symbol(SwapB_sym);
+    const swapA_symbol = standardize_se_symbol(SwapA_sym);
+    const swapB_symbol = standardize_cn_symbol(SwapB_sym);
 
     SwapA_xmr_min_amount = parseFloat( 
-      await se_get_min_exchange_amount(SwapA_symbol, "xmr")
+      await se_get_min_exchange_amount(swapA_symbol, "xmr")
     );
     SwapA_xmr_max_amount = parseFloat( 
-      await se_get_max_exchange_amount(SwapA_symbol, "xmr")
+      await se_get_max_exchange_amount(swapA_symbol, "xmr")
     );
     if (isNaN(SwapA_xmr_max_amount)) SwapA_xmr_max_amount = -1; // no limit for max
     xmr_SwapB_min_amount = parseFloat(
-      await cn_get_minimal_exchange_amount("xmr", SwapB_symbol)
+      await cn_get_minimal_exchange_amount("xmr", swapB_symbol)
     );
     xmr_SwapB_max_amount = parseFloat(
-      await cn_get_maximum_exchange_amount("xmr", SwapB_symbol)
+      await cn_get_maximum_exchange_amount("xmr", swapB_symbol)
     );
     if (isNaN(xmr_SwapB_max_amount)) xmr_SwapB_max_amount = -1; // no limit for max
     if (
-      SwapA_amount < SwapA_xmr_min_amount ||
-      (SwapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
+      swapA_amount < SwapA_xmr_min_amount ||
+      (swapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
     )
     {
-      SwapB_amount = -1;
+      swapB_amount = -1;
       SwapA_min_amount = SwapA_xmr_min_amount; 
       SwapA_max_amount = SwapA_xmr_max_amount; 
     }
     else {
     
       estimated_xmr_amount = await se_get_exchange_amount(
-        SwapA_symbol,
+        swapA_symbol,
         "xmr",
-        SwapA_amount
+        swapA_amount
       );
       const estimate = await cn_get_exchange_amount(
         estimated_xmr_amount,
         "xmr",
-        SwapB_symbol
+        swapB_symbol
       );
-      SwapB_amount = estimate["estimatedAmount"];
-      if (isNaN(SwapB_amount)) SwapB_amount = -1;
+      swapB_amount = estimate["estimatedAmount"];
+      if (isNaN(swapB_amount)) swapB_amount = -1;
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
-        SwapA_amount,
+        swapA_amount,
         SwapA_xmr_min_amount,
         xmr_SwapB_min_amount,
         xmr_SwapB_max_amount
@@ -685,17 +685,17 @@ async function price_se_to_cn(SwapA_amount, SwapA_sym, SwapB_sym) {
 
     }
     console.log("============8========================");
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "se_cn"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "se_cn"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "se_cn"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "se_cn"];
   } catch (error) {
     return [0, 0, 0, "se_cn"];
   }
 }
 // price_se_to_cn(10, "USDT", "BUSD");
 
-async function price_ff_to_se(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_ff_to_se(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
-    let SwapB_amount;
+    let swapB_amount;
     let SwapA_min_amount;
     let SwapA_max_amount;
     let SwapA_xmr_min_amount;
@@ -705,25 +705,25 @@ async function price_ff_to_se(SwapA_amount, SwapA_sym, SwapB_sym) {
     let estimated_xmr_amount;
 
     
-    const SwapA_symbol = standardize_ff_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_se_symbol(SwapB_sym);
+    const swapA_symbol = standardize_ff_symbol(SwapA_sym);
+    const swapB_symbol = standardize_se_symbol(SwapB_sym);
 
-    const XMRObj = await getPrice(SwapA_amount, SwapA_symbol, "XMR");
+    const XMRObj = await getPrice(swapA_amount, swapA_symbol, "XMR");
     SwapA_xmr_min_amount = XMRObj["from"]["min"];
     SwapA_xmr_max_amount = XMRObj["from"]["max"];
     xmr_SwapB_min_amount = parseFloat(
-      await se_get_min_exchange_amount("xmr", SwapB_symbol)
+      await se_get_min_exchange_amount("xmr", swapB_symbol)
     );
     xmr_SwapB_max_amount = parseFloat(
-      await se_get_max_exchange_amount("xmr", SwapB_symbol)
+      await se_get_max_exchange_amount("xmr", swapB_symbol)
     );
     if (isNaN(xmr_SwapB_max_amount)) xmr_SwapB_max_amount = -1; // no limit for max
 
     if (
-      SwapA_amount < SwapA_xmr_min_amount ||
-      (SwapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
+      swapA_amount < SwapA_xmr_min_amount ||
+      (swapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
     ){
-      SwapB_amount = -1;
+      swapB_amount = -1;
       SwapA_min_amount = SwapA_xmr_min_amount; 
       SwapA_max_amount = SwapA_xmr_max_amount; 
     }
@@ -731,31 +731,31 @@ async function price_ff_to_se(SwapA_amount, SwapA_sym, SwapB_sym) {
       estimated_xmr_amount = XMRObj["to"]["amount"];
       let res = await se_get_exchange_amount(
         "xmr",
-        SwapB_symbol,
+        swapB_symbol,
         estimated_xmr_amount
       );
-      SwapB_amount = parseFloat(res);
-      if (isNaN(SwapB_amount)) SwapB_amount = -1;
+      swapB_amount = parseFloat(res);
+      if (isNaN(swapB_amount)) swapB_amount = -1;
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
-        SwapA_amount,
+        swapA_amount,
         SwapA_xmr_min_amount,
         xmr_SwapB_min_amount,
         xmr_SwapB_max_amount
       )
     }
     console.log("==========9==========================");
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ff_se"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ff_se"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "ff_se"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "ff_se"];
   } catch (error) {
     return [0, 0, 0, "ff_se"];
   }
 }
 // price_ff_to_se(10, "USDT", "BUSD");
 
-async function price_cn_to_se(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_cn_to_se(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
-    let SwapB_amount;
+    let swapB_amount;
     let SwapA_min_amount;
     let SwapA_max_amount;
     let SwapA_xmr_min_amount;
@@ -763,52 +763,52 @@ async function price_cn_to_se(SwapA_amount, SwapA_sym, SwapB_sym) {
     let xmr_SwapB_min_amount;
     let xmr_SwapB_max_amount;
 
-    const SwapA_symbol = standardize_cn_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_se_symbol(SwapB_sym);
+    const swapA_symbol = standardize_cn_symbol(SwapA_sym);
+    const swapB_symbol = standardize_se_symbol(SwapB_sym);
     SwapA_xmr_min_amount = parseFloat(
-      await cn_get_minimal_exchange_amount(SwapA_symbol, "xmr")
+      await cn_get_minimal_exchange_amount(swapA_symbol, "xmr")
     );
     SwapA_xmr_max_amount = parseFloat(
-      await cn_get_maximum_exchange_amount(SwapA_symbol, "xmr")
+      await cn_get_maximum_exchange_amount(swapA_symbol, "xmr")
     );
     if (isNaN(SwapA_xmr_max_amount)) SwapA_xmr_max_amount = -1; // no limit for max
     xmr_SwapB_min_amount = parseFloat(
-      await se_get_min_exchange_amount("xmr", SwapB_symbol)
+      await se_get_min_exchange_amount("xmr", swapB_symbol)
     );
     xmr_SwapB_max_amount = parseFloat(
-      await se_get_max_exchange_amount("xmr", SwapB_symbol)
+      await se_get_max_exchange_amount("xmr", swapB_symbol)
     );
     if (isNaN(xmr_SwapB_max_amount)) xmr_SwapB_max_amount = -1; // no limit for max
 
     if (
-      SwapA_amount < SwapA_xmr_min_amount ||
-      (SwapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
+      swapA_amount < SwapA_xmr_min_amount ||
+      (swapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
     ){
-      SwapB_amount = -1;
+      swapB_amount = -1;
       SwapA_min_amount = SwapA_xmr_min_amount; 
       SwapA_max_amount = SwapA_xmr_max_amount; 
     }
     else {
       const estimate = await cn_get_exchange_amount(
-        SwapA_amount,
-        SwapA_symbol,
+        swapA_amount,
+        swapA_symbol,
         "xmr"
       );
       const estimated_xmr_amount = estimate["estimatedAmount"];
-      SwapB_amount = parseFloat(
-        await se_get_exchange_amount("xmr", SwapB_symbol, estimated_xmr_amount)
+      swapB_amount = parseFloat(
+        await se_get_exchange_amount("xmr", swapB_symbol, estimated_xmr_amount)
       );
-      if (isNaN(SwapB_amount)) SwapB_amount = -1;
+      if (isNaN(swapB_amount)) swapB_amount = -1;
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
-        SwapA_amount,
+        swapA_amount,
         SwapA_xmr_min_amount,
         xmr_SwapB_min_amount,
         xmr_SwapB_max_amount
       )
-      if (SwapA_amount > SwapA_max_amount && SwapA_max_amount>0 ) SwapB_amount = -1;
+      if (swapA_amount > SwapA_max_amount && SwapA_max_amount>0 ) swapB_amount = -1;
     }
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "cn_se"];
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "cn_se"];
   } catch (error) {
     return [0, 0, 0, "cn_se"];
   }
@@ -816,158 +816,158 @@ async function price_cn_to_se(SwapA_amount, SwapA_sym, SwapB_sym) {
 // price_cn_to_se(10, "USDT", "BUSD");
 
 
-async function price_ss_to_se(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_ss_to_se(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
-    let SwapB_amount;
+    let swapB_amount;
     let SwapA_min_amount;
     let SwapA_max_amount;
     let SwapA_xmr_min_amount;
     let SwapA_xmr_max_amount;
     let xmr_SwapB_min_amount;
     let xmr_SwapB_max_amount;
-    const SwapA_symbol = standardize_ss_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_se_symbol(SwapB_sym);
+    const swapA_symbol = standardize_ss_symbol(SwapA_sym);
+    const swapB_symbol = standardize_se_symbol(SwapB_sym);
     SwapA_xmr_min_amount = parseFloat( 
-      await ss_get_min_exchange_amount(SwapA_symbol, "xmr")
+      await ss_get_min_exchange_amount(swapA_symbol, "xmr")
     );
     SwapA_xmr_max_amount = parseFloat( 
-      await ss_get_max_exchange_amount(SwapA_symbol, "xmr")
+      await ss_get_max_exchange_amount(swapA_symbol, "xmr")
     );
     if (isNaN(SwapA_xmr_max_amount)) SwapA_xmr_max_amount = -1; // no limit for max
     xmr_SwapB_min_amount = parseFloat(
-      await se_get_min_exchange_amount("xmr", SwapB_symbol)
+      await se_get_min_exchange_amount("xmr", swapB_symbol)
     );
     xmr_SwapB_max_amount = parseFloat(
-      await se_get_max_exchange_amount("xmr", SwapB_symbol)
+      await se_get_max_exchange_amount("xmr", swapB_symbol)
     );
     if (isNaN(xmr_SwapB_max_amount)) xmr_SwapB_max_amount = -1; // no limit for max
     if (
-      SwapA_amount < SwapA_xmr_min_amount ||
-      (SwapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
+      swapA_amount < SwapA_xmr_min_amount ||
+      (swapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
     ){
-      SwapB_amount = -1;
+      swapB_amount = -1;
       SwapA_min_amount = SwapA_xmr_min_amount; 
       SwapA_max_amount = SwapA_xmr_max_amount; 
     }else {
       estimated_xmr_amount = await ss_get_exchange_amount(
-        SwapA_symbol,
+        swapA_symbol,
         "xmr",
-        SwapA_amount
+        swapA_amount
       );
-      SwapB_amount = parseFloat(
-        await se_get_exchange_amount("xmr", SwapB_symbol, estimated_xmr_amount)
+      swapB_amount = parseFloat(
+        await se_get_exchange_amount("xmr", swapB_symbol, estimated_xmr_amount)
       );
-      if (isNaN(SwapB_amount)) SwapB_amount = -1;
+      if (isNaN(swapB_amount)) swapB_amount = -1;
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
-        SwapA_amount,
+        swapA_amount,
         SwapA_xmr_min_amount,
         xmr_SwapB_min_amount,
         xmr_SwapB_max_amount
       )
-      if (SwapA_amount > SwapA_max_amount && SwapA_max_amount>0 ) SwapB_amount = -1;
+      if (swapA_amount > SwapA_max_amount && SwapA_max_amount>0 ) swapB_amount = -1;
     }
     console.log("==========11==========================");
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ss_se"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ss_se"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "ss_se"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "ss_se"];
   } catch (error) {
     return [0, 0, 0, "ss_se"];
   }
 }
 
-async function price_se_to_ss(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_se_to_ss(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
-    let SwapB_amount;
+    let swapB_amount;
     let SwapA_min_amount;
     let SwapA_max_amount;
     let SwapA_xmr_min_amount;
     let SwapA_xmr_max_amount;
     let xmr_SwapB_min_amount;
     let xmr_SwapB_max_amount;
-    const SwapA_symbol = standardize_se_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_ss_symbol(SwapB_sym);
+    const swapA_symbol = standardize_se_symbol(SwapA_sym);
+    const swapB_symbol = standardize_ss_symbol(SwapB_sym);
     SwapA_xmr_min_amount = parseFloat( 
-      await se_get_min_exchange_amount(SwapA_symbol, "xmr")
+      await se_get_min_exchange_amount(swapA_symbol, "xmr")
     );
     SwapA_xmr_max_amount = parseFloat( 
-      await se_get_max_exchange_amount(SwapA_symbol, "xmr")
+      await se_get_max_exchange_amount(swapA_symbol, "xmr")
     );
     if (isNaN(SwapA_xmr_max_amount)) SwapA_xmr_max_amount = -1; // no limit for max
     xmr_SwapB_min_amount = parseFloat(
-      await ss_get_min_exchange_amount("xmr", SwapB_symbol)
+      await ss_get_min_exchange_amount("xmr", swapB_symbol)
     );
     xmr_SwapB_max_amount = parseFloat(
-      await ss_get_max_exchange_amount("xmr", SwapB_symbol)
+      await ss_get_max_exchange_amount("xmr", swapB_symbol)
     );
     if (isNaN(xmr_SwapB_max_amount)) xmr_SwapB_max_amount = -1; // no limit for max
     if (
-      SwapA_amount < SwapA_xmr_min_amount ||
-      (SwapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
+      swapA_amount < SwapA_xmr_min_amount ||
+      (swapA_amount > SwapA_xmr_max_amount && SwapA_xmr_max_amount > 0)
     ){
-      SwapB_amount = -1;
+      swapB_amount = -1;
       SwapA_min_amount = SwapA_xmr_min_amount; 
       SwapA_max_amount = SwapA_xmr_max_amount; 
     }else {
       estimated_xmr_amount = await se_get_exchange_amount(
-        SwapA_symbol,
+        swapA_symbol,
         "xmr",
-        SwapA_amount
+        swapA_amount
       );
-      SwapB_amount = parseFloat(
-        await ss_get_exchange_amount("xmr", SwapB_symbol, estimated_xmr_amount)
+      swapB_amount = parseFloat(
+        await ss_get_exchange_amount("xmr", swapB_symbol, estimated_xmr_amount)
       );
-      if (isNaN(SwapB_amount)) SwapB_amount = -1;
+      if (isNaN(swapB_amount)) swapB_amount = -1;
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
-        SwapA_amount,
+        swapA_amount,
         SwapA_xmr_min_amount,
         xmr_SwapB_min_amount,
         xmr_SwapB_max_amount
       )
-      if (SwapA_amount > SwapA_max_amount && SwapA_max_amount>0 ) SwapB_amount = -1;
+      if (swapA_amount > SwapA_max_amount && SwapA_max_amount>0 ) swapB_amount = -1;
     }
     console.log("==========12==========================");
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "se_ss"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "se_ss"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "se_ss"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "se_ss"];
   } catch (error) {
     return [0, 0, 0, "se_ss"];
   }
 }
 
-async function price_cn(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_cn(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
-    let SwapB_amount;
+    let swapB_amount;
     let SwapA_max_amount = 0;
-    const SwapA_symbol = standardize_cn_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_cn_symbol(SwapB_sym);
+    const swapA_symbol = standardize_cn_symbol(SwapA_sym);
+    const swapB_symbol = standardize_cn_symbol(SwapB_sym);
     const SwapA_min_amount = await cn_get_minimal_exchange_amount(
-      SwapA_symbol,
-      SwapB_symbol
+      swapA_symbol,
+      swapB_symbol
     );
     const SwapA_max_amount_temp = await cn_get_maximum_exchange_amount(
-      SwapA_symbol,
-      SwapB_symbol
+      swapA_symbol,
+      swapB_symbol
     );
     SwapA_max_amount =
       SwapA_max_amount_temp === null ? -1 : SwapA_max_amount_temp;
     if (
-      (SwapA_min_amount <= SwapA_amount &&
+      (SwapA_min_amount <= swapA_amount &&
         SwapA_max_amount > 0 &&
-        SwapA_amount <= SwapA_max_amount) ||
+        swapA_amount <= SwapA_max_amount) ||
       SwapA_max_amount < 0
     ) {
       const estimate = await cn_get_exchange_amount(
-        SwapA_amount,
-        SwapA_symbol,
-        SwapB_symbol
+        swapA_amount,
+        swapA_symbol,
+        swapB_symbol
       );
-      SwapB_amount = estimate["estimatedAmount"];
+      swapB_amount = estimate["estimatedAmount"];
     } else {
-      SwapB_amount = -1;
+      swapB_amount = -1;
     }
     console.log("===========13=========================");
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "cn"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "cn"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "cn"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "cn"];
   } catch (error) {
     console.log("errror", error);
     return [0, 0, 0, "cn"];
@@ -975,47 +975,47 @@ async function price_cn(SwapA_amount, SwapA_sym, SwapB_sym) {
 }
 // price_cn(10, "USDT", "BUSD");
 
-async function price_ff(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_ff(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
-    const SwapA_symbol = standardize_ff_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_ff_symbol(SwapB_sym);
+    const swapA_symbol = standardize_ff_symbol(SwapA_sym);
+    const swapB_symbol = standardize_ff_symbol(SwapB_sym);
     const priceObj = await getPrice_ff(
-      SwapA_amount,
-      SwapA_symbol,
-      SwapB_symbol
+      swapA_amount,
+      swapA_symbol,
+      swapB_symbol
     );
     const SwapA_min_amount = priceObj["from"]["min"];
     const SwapA_max_amount = priceObj["from"]["max"];
-    const SwapB_amount = priceObj["to"]["amount"];
+    const swapB_amount = priceObj["to"]["amount"];
     console.log("===========14=========================");
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ff"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ff"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "ff"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "ff"];
   } catch (error) {
     return [0, 0, 0, "ff"];
   }
 }
 
 // price_ff(10, "USDT", "BUSD");
-async function price_ss(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_ss(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
     let SwapA_min_amount;
     let SwapA_max_amount;
-    const SwapA_symbol = standardize_ss_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_ss_symbol(SwapB_sym);
-    const SwapA_amount_info = await ss_get_minmax_exchange_amount(
-      SwapA_symbol,
-      SwapB_symbol
+    const swapA_symbol = standardize_ss_symbol(SwapA_sym);
+    const swapB_symbol = standardize_ss_symbol(SwapB_sym);
+    const swapA_amount_info = await ss_get_minmax_exchange_amount(
+      swapA_symbol,
+      swapB_symbol
     );
-    const SwapA_max_amount_temp = SwapA_amount_info["max"];
-    SwapA_min_amount = parseFloat(SwapA_amount_info["min"]);
-    SwapA_max_amount = parseFloat(SwapA_amount_info["max"]);
+    const SwapA_max_amount_temp = swapA_amount_info["max"];
+    SwapA_min_amount = parseFloat(swapA_amount_info["min"]);
+    SwapA_max_amount = parseFloat(swapA_amount_info["max"]);
     if (SwapA_max_amount_temp === "" || SwapA_max_amount_temp === null)
       SwapA_max_amount = -1;
-    const SwapB_amount = parseFloat(
-      await ss_get_exchange_amount(SwapA_symbol, SwapB_symbol, SwapA_amount)
+    const swapB_amount = parseFloat(
+      await ss_get_exchange_amount(swapA_symbol, swapB_symbol, swapA_amount)
     );
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ss"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "ss"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "ss"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "ss"];
   } catch (error) {
     console.log("===========simple swap =========================");
     console.log("error", error);
@@ -1023,130 +1023,130 @@ async function price_ss(SwapA_amount, SwapA_sym, SwapB_sym) {
   }
 }
 // price_ss(10, "USDT", "BUSD");
-async function price_se(SwapA_amount, SwapA_sym, SwapB_sym) {
+async function price_se(swapA_amount, SwapA_sym, SwapB_sym) {
   try {
     let SwapA_min_amount;
     let SwapA_max_amount;
-    let SwapB_amount;
-    let SwapB_amount_temp;
-    const SwapA_symbol = standardize_se_symbol(SwapA_sym);
-    const SwapB_symbol = standardize_se_symbol(SwapB_sym);
+    let swapB_amount;
+    let swapB_amount_temp;
+    const swapA_symbol = standardize_se_symbol(SwapA_sym);
+    const swapB_symbol = standardize_se_symbol(SwapB_sym);
     SwapA_min_amount = parseFloat(
-      await se_get_min_exchange_amount(SwapA_symbol, SwapB_symbol)
+      await se_get_min_exchange_amount(swapA_symbol, swapB_symbol)
     );
     const SwapA_max_amount_temp = parseFloat(
-      await se_get_max_exchange_amount(SwapA_symbol, SwapB_symbol)
+      await se_get_max_exchange_amount(swapA_symbol, swapB_symbol)
     );
     SwapA_max_amount = isNaN(SwapA_max_amount_temp)
       ? -1
       : SwapA_max_amount_temp;
     if (
-      (SwapA_min_amount <= SwapA_amount &&
+      (SwapA_min_amount <= swapA_amount &&
         SwapA_max_amount > 0 &&
-        SwapA_amount <= SwapA_max_amount) ||
+        swapA_amount <= SwapA_max_amount) ||
       SwapA_max_amount < 0
     ) {
-      SwapB_amount_temp = parseFloat(
+      swapB_amount_temp = parseFloat(
         await se_get_exchange_amount(
-          SwapA_symbol,
-          SwapB_symbol,
-          SwapA_amount
+          swapA_symbol,
+          swapB_symbol,
+          swapA_amount
         )
       );
-      SwapB_amount = isNaN(SwapB_amount_temp)
+      swapB_amount = isNaN(swapB_amount_temp)
       ? -1
-      : SwapB_amount_temp;
+      : swapB_amount_temp;
     } else {
-      SwapB_amount = -1;
+      swapB_amount = -1;
     }
     console.log("===========16=========================");
-    console.log([SwapB_amount, SwapA_min_amount, SwapA_max_amount, "se"]);
-    return [SwapB_amount, SwapA_min_amount, SwapA_max_amount, "se"];
+    console.log([swapB_amount, SwapA_min_amount, SwapA_max_amount, "se"]);
+    return [swapB_amount, SwapA_min_amount, SwapA_max_amount, "se"];
   } catch (error) {
     return [0, 0, 0, "se"];
   }
 }
 // price_se(10, "USDT", "BUSD");
-function get_price(SwapA_amount, SwapA_symbol, SwapB_symbol, isAnonym) {
+function get_price(swapA_amount, swapA_symbol, swapB_symbol, isAnonym) {
   return new Promise((resolve, reject) => {
     console.log("get_price_start==========");
-    console.log("SwapA_amount==========", SwapA_amount);
-    console.log("SwapA_symbol==========", SwapA_symbol);
-    console.log("SwapB_symbol==========", SwapB_symbol);
+    console.log("swapA_amount==========", swapA_amount);
+    console.log("swapA_symbol==========", swapA_symbol);
+    console.log("swapB_symbol==========", swapB_symbol);
     console.log("isAnonym==========", isAnonym);
 
     let price_list = [];
     let price_quoting_func_array = [];
 
-    if (SwapA_symbol === "XMR" || SwapB_symbol === "XMR" || isAnonym === 0) {
+    if (swapA_symbol === "XMR" || swapB_symbol === "XMR" || isAnonym === 0) {
       if (FF_ENABLE === "true") {
         price_quoting_func_array.push(
-          price_ff(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_ff(swapA_amount, swapA_symbol, swapB_symbol)
         );
       }
       if (SS_ENABLE === "true") {
         price_quoting_func_array.push(
-          price_ss(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_ss(swapA_amount, swapA_symbol, swapB_symbol)
         );
       }
       if (SE_ENABLE === "true") {
         price_quoting_func_array.push(
-          price_se(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_se(swapA_amount, swapA_symbol, swapB_symbol)
         );
       }
       if (CN_ENABLE === "true") {
         price_quoting_func_array.push(
-          price_cn(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_cn(swapA_amount, swapA_symbol, swapB_symbol)
         );
       }
     } else {
       console.time();
       if (FF_ENABLE === "true" && CN_ENABLE === "true") {
         price_quoting_func_array.push(
-          price_cn_to_ff(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_cn_to_ff(swapA_amount, swapA_symbol, swapB_symbol)
         );
         price_quoting_func_array.push(
-          price_ff_to_cn(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_ff_to_cn(swapA_amount, swapA_symbol, swapB_symbol)
         );
       }
       if (SS_ENABLE === "true" && CN_ENABLE === "true") {
         price_quoting_func_array.push(
-          price_cn_to_ss(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_cn_to_ss(swapA_amount, swapA_symbol, swapB_symbol)
         );
         price_quoting_func_array.push(
-          price_ss_to_cn(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_ss_to_cn(swapA_amount, swapA_symbol, swapB_symbol)
         );
       }
       if (SS_ENABLE === "true" && SE_ENABLE === "true") {
         price_quoting_func_array.push(
-          price_ss_to_se(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_ss_to_se(swapA_amount, swapA_symbol, swapB_symbol)
         );
         price_quoting_func_array.push(
-          price_se_to_ss(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_se_to_ss(swapA_amount, swapA_symbol, swapB_symbol)
         );
       }
       if (SE_ENABLE === "true" && FF_ENABLE === "true") {
         price_quoting_func_array.push(
-          price_se_to_ff(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_se_to_ff(swapA_amount, swapA_symbol, swapB_symbol)
         );
         price_quoting_func_array.push(
-          price_ff_to_se(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_ff_to_se(swapA_amount, swapA_symbol, swapB_symbol)
         );
       }
       if (FF_ENABLE === "true" && SS_ENABLE === "true") {
         price_quoting_func_array.push(
-          price_ss_to_ff(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_ss_to_ff(swapA_amount, swapA_symbol, swapB_symbol)
         );
         price_quoting_func_array.push(
-          price_ff_to_ss(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_ff_to_ss(swapA_amount, swapA_symbol, swapB_symbol)
         );
       }
       if (CN_ENABLE === "true" && SE_ENABLE === "true") {
         price_quoting_func_array.push(
-          price_se_to_cn(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_se_to_cn(swapA_amount, swapA_symbol, swapB_symbol)
         );
         price_quoting_func_array.push(
-          price_cn_to_se(SwapA_amount, SwapA_symbol, SwapB_symbol)
+          price_cn_to_se(swapA_amount, swapA_symbol, swapB_symbol)
         );
       }
     }
