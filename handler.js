@@ -33,7 +33,7 @@ api.post("/api/swap_price", async (req, res) => {
       new Promise((_resolve, reject) => {
         setTimeout(() => {
           reject("Time out");
-        }, 5000);
+        }, 10000);
       }),
     ]);
     const content = {

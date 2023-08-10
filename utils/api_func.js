@@ -1,7 +1,7 @@
 // @ts-ignore
 const axios = require("axios");
 
-axios.defaults.timeout = 20000;
+axios.defaults.timeout = 10000;
 
 const FF_API_KEY = process.env.FF_API_KEY;
 const FF_API_SECRET = process.env.FF_API_SECRET;
