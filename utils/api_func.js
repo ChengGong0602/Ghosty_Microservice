@@ -250,7 +250,7 @@ async function price_cn_to_ff(swapA_amount, SwapA_sym, SwapB_sym) {
         "XMR",
         swapB_symbol
       );
-      swapB_amount = priceObj["to"]["amount"];
+      swapB_amount = float(priceObj["to"]["amount"]);
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
         swapA_amount,
@@ -367,7 +367,7 @@ async function price_ss_to_ff(swapA_amount, SwapA_sym, SwapB_sym) {
         swapA_amount
       );
       const XMRObj = await getPrice_ff(estimated_xmr_amount, "XMR", swapB_symbol);
-      swapB_amount = XMRObj["to"]["amount"];
+      swapB_amount = float(XMRObj["to"]["amount"]);
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
         swapA_amount,
@@ -611,7 +611,7 @@ async function price_se_to_ff(swapA_amount, SwapA_sym, SwapB_sym) {
         swapA_amount
       );
       const XMRObj = await getPrice_ff(estimated_xmr_amount, "XMR", swapB_symbol);
-      swapB_amount = XMRObj["to"]["amount"];
+      swapB_amount = float(XMRObj["to"]["amount"]);
       [SwapA_min_amount, SwapA_max_amount] = get_min_max_range(
         estimated_xmr_amount,
         swapA_amount,
