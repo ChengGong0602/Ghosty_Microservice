@@ -1,5 +1,6 @@
 // @ts-ignore
 const axios = require("axios");
+const crypto = require('crypto');
 
 axios.defaults.timeout = 10000;
 
